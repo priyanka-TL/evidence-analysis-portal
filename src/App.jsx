@@ -21,6 +21,7 @@ function App() {
         <Route path="/reports" element={<ReportsList />} />
         <Route path="/reports/templates/:id" element={<TemplateDetails />} />
         <Route path="/reports/generate" element={<GenerateReport />} />
+        <Route path="/reports/edit/:id" element={<GenerateReport />} />
         <Route path="/reports/view/:id" element={<ViewReport />} />
       </Routes>
     </Router>

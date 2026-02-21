@@ -15,23 +15,29 @@ const api = axios.create({
 export const listPrograms = () => api.get('/programs');
 export const getProgram = (programId) => api.get(`/programs/${programId}`);
 
+// Default Template
+// Returns the static list of default section definitions (up to geo map)
+export const getDefaultTemplate = () => api.get('/reports/default-template');
+
 // Report Management
 export const createReport = (data) => api.post('/reports', data);
-export const listReports = (programId) => 
+export const listReports = (programId) =>
   api.get('/reports', { params: programId ? { program_id: programId } : {} });
-export const getReportWithData = (templateId) => 
-  api.get(`/reports/${templateId}`);
-export const deleteReport = (templateId) => 
+export const getReportWithData = (templateId, filters = {}) =>
+  api.get(`/reports/${templateId}`, { params: filters });
+export const getFilterOptions = (templateId) =>
+  api.get(`/reports/${templateId}/filter-options`);
+export const deleteReport = (templateId) =>
   api.delete(`/reports/${templateId}`);
 
 // AI Section Generation
-export const generateSectionWithAI = (templateId, data) => 
+export const generateSectionWithAI = (templateId, data) =>
   api.post(`/reports/${templateId}/sections/ai-generate`, data);
 
 // Section Management
-export const reorderSections = (templateId, data) => 
+export const reorderSections = (templateId, data) =>
   api.put(`/reports/${templateId}/sections/reorder`, data);
-export const deleteSection = (templateId, sectionId) => 
+export const deleteSection = (templateId, sectionId) =>
   api.delete(`/reports/${templateId}/sections/${sectionId}`);
 
 // Legacy API (kept for backward compatibility)
@@ -41,4 +47,3 @@ export const getReport = (id) => api.get(`/reports/${id}`);
 export const getReports = (programId) => listReports(programId);
 
 export default api;
-

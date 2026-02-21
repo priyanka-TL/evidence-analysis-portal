@@ -117,56 +117,82 @@ export default function ReportsList() {
           gap: 16
         }}>
           {reports.map(report => (
-            <div 
+            <div
               key={report.id}
-              onClick={() => navigate(`/reports/view/${report.id}`)}
               style={{
                 backgroundColor: 'white',
                 border: '1px solid #ddd',
                 borderRadius: 8,
                 padding: 16,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                e.currentTarget.style.transform = 'translateY(0)';
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
               }}
             >
-              <h3 style={{ margin: 0, marginBottom: 8, fontSize: 18 }}>
-                {report.name}
-              </h3>
-              {report.description && (
-                <p style={{ margin: 0, marginBottom: 12, color: '#666', fontSize: 14 }}>
-                  {report.description}
-                </p>
-              )}
-              <div style={{ fontSize: 12, color: '#999' }}>
-                Created {new Date(report.created_at).toLocaleDateString()}
+              {/* card body */}
+              <div>
+                <h3 style={{ margin: 0, marginBottom: 8, fontSize: 18 }}>
+                  {report.name}
+                </h3>
+                {report.description && (
+                  <p style={{ margin: 0, marginBottom: 12, color: '#666', fontSize: 14 }}>
+                    {report.description}
+                  </p>
+                )}
+                <div style={{ fontSize: 12, color: '#999' }}>
+                  Created {new Date(report.created_at).toLocaleDateString()}
+                </div>
               </div>
-              <div style={{ 
-                marginTop: 12,
+
+              {/* card footer with actions */}
+              <div style={{
+                marginTop: 14,
                 paddingTop: 12,
                 borderTop: '1px solid #eee',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
               }}>
-                <span style={{ 
+                <span style={{
                   fontSize: 12,
                   color: report.is_template ? '#0066cc' : '#666',
-                  fontWeight: report.is_template ? 500 : 400
+                  fontWeight: report.is_template ? 500 : 400,
                 }}>
                   {report.is_template ? '📋 Template' : '📊 Report'}
                 </span>
-                <span style={{ fontSize: 12, color: '#0066cc', fontWeight: 500 }}>
-                  View →
-                </span>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => navigate(`/reports/edit/${report.id}`)}
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      border: '1px solid #cbd5e1',
+                      borderRadius: 6,
+                      background: '#f8fafc',
+                      color: '#334155',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => navigate(`/reports/view/${report.id}`)}
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      border: 'none',
+                      borderRadius: 6,
+                      background: '#0066cc',
+                      color: 'white',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    👁 View
+                  </button>
+                </div>
               </div>
             </div>
           ))}
