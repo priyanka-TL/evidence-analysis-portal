@@ -115,23 +115,36 @@ export default function ChartRenderer({ section }) {
     } : undefined,
   };
 
-  // ─── METRIC ───────────────────────────────────────────────────────────────
+  // ─── METRIC (matches report.html .card / .big-number / .metric-label) ───────
   if (section_type === 'metric') {
     return (
-      <div style={{
-        textAlign: 'center', padding: '32px 16px',
-        background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
-        borderRadius: 15, boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
-        border: '1px solid rgba(255,255,255,0.2)',
-      }}>
-        <div style={{ fontSize: 10, color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+          borderRadius: 15,
+          padding: 25,
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          transition: 'all 0.3s ease',
+          cursor: 'default',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = '';
+          e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+        }}
+      >
+        <div style={{ fontSize: '0.9em', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 5 }}>
           {title}
         </div>
-        <div style={{ fontSize: 54, fontWeight: 700, color: '#2d3748', lineHeight: 1.1 }}>
+        <div style={{ fontSize: '2.2em', fontWeight: 700, color: '#2d3748', marginBottom: 10 }}>
           {(data.value ?? 0).toLocaleString()}
         </div>
         {description && (
-          <div style={{ marginTop: 8, fontSize: 12, color: '#718096' }}>{description}</div>
+          <div style={{ color: '#718096', fontSize: '0.85em' }}>{description}</div>
         )}
       </div>
     );
@@ -305,20 +318,41 @@ export default function ChartRenderer({ section }) {
     );
   }
 
-  // ─── RELEVANCE DISTRIBUTION ───────────────────────────────────────────────
+  // ─── RELEVANCE DISTRIBUTION (matches report.html card with 3-line text) ─────
   if (section_type === 'relevance_distribution') {
     return (
-      <div style={{ padding: 32, background: 'white', borderRadius: 12, border: '1px solid #e0e0e0', display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {[
-          { key: 'relevant', label: 'Relevant', color: '#22c55e' },
-          { key: 'partially_relevant', label: 'Partially Relevant', color: '#eab308' },
-          { key: 'irrelevant', label: 'Irrelevant', color: '#ef4444' },
-        ].map(({ key, label, color }) => (
-          <div key={key} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 52, fontWeight: 700, color }}>{data[key] || 0}%</div>
-            <div style={{ fontSize: 14, color: '#718096', marginTop: 6 }}>{label}</div>
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+          borderRadius: 15,
+          padding: 25,
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          transition: 'all 0.3s ease',
+          cursor: 'default',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = '';
+          e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+        }}
+      >
+        <div style={{ fontSize: '0.9em', color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>
+          Relevance Distribution
+        </div>
+        <div style={{ fontSize: '1.2em', lineHeight: 1.8 }}>
+          <div><strong style={{ color: '#22c55e', fontSize: '1.15em' }}>{data.relevant || 0}%</strong>&nbsp; Relevant</div>
+          <div><strong style={{ color: '#eab308', fontSize: '1.15em' }}>{data.partially_relevant || 0}%</strong>&nbsp; Partially Relevant</div>
+          <div><strong style={{ color: '#ef4444', fontSize: '1.15em' }}>{data.irrelevant || 0}%</strong>&nbsp; Irrelevant</div>
+        </div>
+        {data.total != null && (
+          <div style={{ marginTop: 10, color: '#718096', fontSize: '0.85em' }}>
+            {data.total.toLocaleString()} validations total
           </div>
-        ))}
+        )}
       </div>
     );
   }
