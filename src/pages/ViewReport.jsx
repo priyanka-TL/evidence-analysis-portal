@@ -9,14 +9,14 @@ import ChartRenderer from '../components/ChartRenderer';
 
 /* ─── colour palette matching report.html ──────────────────────────────────── */
 const GROUP_META = {
-  'Executive Summary':                { icon: '📊', color: '#4facfe' },
-  'Evidence Submission Overview':     { icon: '📈', color: '#42e695' },
-  'Quality & Relevance Analysis':     { icon: '🎯', color: '#f97316' },
-  'District-wise Submission Quality': { icon: '🗺️', color: '#a855f7' },
+  'Executive Summary':                          { icon: '📊', color: '#4facfe' },
+  'Evidence Submission Overview':               { icon: '📈', color: '#42e695' },
+  'Quality & Relevance Analysis':               { icon: '🎯', color: '#f97316' },
+  'District-wise Submission Quality & Insights':{ icon: '🗺️', color: '#a855f7' },
 };
 
-/* Helper: which sections should display as inline metric cards in a grid */
-const isMetric = s => s.section_type === 'metric';
+/* Render in metric grid: metric cards AND relevance-distribution cards */
+const isMetric = s => s.section_type === 'metric' || s.section_type === 'relevance_distribution';
 
 export default function ViewReport() {
   const { id } = useParams();
@@ -65,15 +65,21 @@ export default function ViewReport() {
   /* ── filter actions ───────────────────────────────────────────────────── */
   const applyFilters = () => {
     const f = {};
-    if (district) f.district = district;
-    if (block)    f.block    = block;
+    if (stateVal)  f.state    = stateVal;
+    if (district)  f.district = district;
+    if (block)     f.block    = block;
+    if (school)    f.school   = school;
+    if (relevance) f.relevance = relevance;
     setActiveFilters(f);
     loadReport(f);
   };
 
   const resetFilters = () => {
+    setStateVal('');
     setDistrict('');
     setBlock('');
+    setSchool('');
+    setRelevance('');
     setActiveFilters({});
     loadReport({});
   };
@@ -81,8 +87,11 @@ export default function ViewReport() {
   const removeFilter = (key) => {
     const f = { ...activeFilters };
     delete f[key];
-    if (key === 'district') setDistrict('');
-    if (key === 'block')    setBlock('');
+    if (key === 'state')     setStateVal('');
+    if (key === 'district')  setDistrict('');
+    if (key === 'block')     setBlock('');
+    if (key === 'school')    setSchool('');
+    if (key === 'relevance') setRelevance('');
     setActiveFilters(f);
     loadReport(f);
   };
@@ -123,14 +132,23 @@ export default function ViewReport() {
 
   if (!report) return null;
 
-  /* ── group sections by section_group (preserve order) ─────────────────── */
-  const groups = [];
+  /* ── group sections by section_group (fixed display order) ────────────── */
+  const GROUP_ORDER = [
+    'Executive Summary',
+    'Evidence Submission Overview',
+    'Quality & Relevance Analysis',
+    'District-wise Submission Quality & Insights',
+  ];
   const groupMap = new Map();
   (report.sections || []).forEach(s => {
     const g = s.section_group || 'Other';
-    if (!groupMap.has(g)) { groupMap.set(g, []); groups.push(g); }
+    if (!groupMap.has(g)) groupMap.set(g, []);
     groupMap.get(g).push(s);
   });
+  /* Render in canonical order, append any extra groups at the end */
+  const knownGroups = GROUP_ORDER.filter(g => groupMap.has(g));
+  const extraGroups = [...groupMap.keys()].filter(g => !GROUP_ORDER.includes(g));
+  const groups = [...knownGroups, ...extraGroups];
 
   const customSections = (report.sections || []).filter(s => !s.is_default);
 
@@ -232,19 +250,16 @@ export default function ViewReport() {
                   {meta.icon} {group}
                 </h2>
 
-                {/* Metrics in grid */}
+                {/* Metrics in grid — auto-fit responsive (3-4 col like report.html grid-3/grid-4) */}
                 {metrics.length > 0 && (
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: `repeat(auto-fit, minmax(${metrics.length > 3 ? '180px' : '240px'}, 1fr))`,
+                    gridTemplateColumns: `repeat(auto-fit, minmax(220px, 1fr))`,
                     gap: 20,
                     marginBottom: 24,
                   }}>
                     {metrics.map(s => (
-                      <div key={s.id} style={{ cursor: 'default' }}
-                        onMouseEnter={e => e.currentTarget.firstChild && (e.currentTarget.firstChild.style.transform = 'translateY(-5px)')}
-                        onMouseLeave={e => e.currentTarget.firstChild && (e.currentTarget.firstChild.style.transform = '')}
-                      >
+                      <div key={s.id}>
                         <ChartRenderer section={s} />
                       </div>
                     ))}
@@ -261,6 +276,35 @@ export default function ViewReport() {
                     <ChartRenderer section={s} />
                   </div>
                 ))}
+
+                {/* Map placeholder with legend for District-wise section */}
+                {group === 'District-wise Submission Quality & Insights' && (
+                  <div style={styles.chartContainer}>
+                    <div style={styles.chartTitle}>State District Relevance Map</div>
+                    <div style={{
+                      minHeight: 400, display: 'flex', justifyContent: 'center',
+                      alignItems: 'center', background: 'linear-gradient(135deg, #eef2ff, #f0f9ff)',
+                      borderRadius: 12, color: '#718096', fontSize: 16, flexDirection: 'column', gap: 12,
+                    }}>
+                      <div style={{ fontSize: 48 }}>🗺️</div>
+                      <div style={{ fontWeight: 600 }}>Interactive district map (GeoJSON required)</div>
+                      <div style={{ fontSize: 13, opacity: 0.7 }}>Upload a state GeoJSON to enable the heatmap overlay</div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 20, flexWrap: 'wrap', fontSize: 14 }}>
+                      {[
+                        ['#42e695', '≥60% Relevant'],
+                        ['#feca57', '40–60% Relevant'],
+                        ['#ff6b6b', '<40% Relevant'],
+                        ['#e0e0e0', 'No Data'],
+                      ].map(([bg, label]) => (
+                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ width: 20, height: 20, background: bg, borderRadius: 4 }} />
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

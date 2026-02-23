@@ -458,7 +458,7 @@ export default function GenerateReport() {
                   <option value="">Select a program</option>
                   {programs.map(p => (
                     <option key={p.id} value={p.id}>
-                      {p.name}{p.state ? ` - ${p.state}` : ''} ({p.status})
+                      {p.name}{p.state ? ` - ${p.state}` : ''} [{p.program_ref_id}]
                     </option>
                   ))}
                 </select>
